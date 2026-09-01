@@ -1,0 +1,37 @@
+model:
+  id: Qwen/Qwen3-4B-Instruct-2507
+  revision: main
+  parameter_count: 4000000000
+  trust_remote_code: false
+  local_files_only: false
+
+architecture:
+  hidden_size: 2560
+  intermediate_size: 9728
+  num_hidden_layers: 36
+  num_attention_heads: 32
+  num_key_value_heads: 8
+  head_dim: 128
+
+runtime:
+  device: cuda:0
+  dtype: bfloat16
+  quantization: 4bit
+  max_seq_length: 512
+  gpu_safety_margin_gib: 2.0
+
+quantization:
+  quant_type: nf4
+  compute_dtype: bfloat16
+  use_double_quant: true
+
+smoke_test:
+  system_prompt: 你是 SQLite 查询生成器。只输出一条只读 SQL，不要解释。
+  user_prompt: |-
+    数据库结构：
+    CREATE TABLE department (id INTEGER PRIMARY KEY, name TEXT, budget REAL);
+
+    问题：
+    预算超过 100 万的部门有多少个？
+  max_new_tokens: 32
+  do_sample: false

@@ -1,0 +1,64 @@
+source:
+  name: cspider
+  version: official-full
+  train_json: data/train.json
+  dev_json: data/dev.json
+  tables_json: data/tables.json
+  database_dir: data/database
+  homepage: https://taolusi.github.io/CSpider-explorer/
+  repository: https://github.com/taolusi/chisp
+  license_note: >-
+    CSpider is derived from Spider. The CSpider repository does not provide a
+    clear standalone dataset license; use is limited to this learning/research
+    project and raw data must not be redistributed until terms are confirmed.
+
+paths:
+  source_manifest: data/manifests/source_manifest.json
+  canonical_all: data/interim/canonical_all.jsonl
+  canonical_executed: data/interim/canonical_executed.jsonl
+  canonical_clean: data/interim/canonical_clean.jsonl
+  execution_failures: data/interim/audit/execution_failures.jsonl
+  clean_rejections: data/interim/audit/clean_rejections.jsonl
+  execution_summary: data/interim/execution_summary.json
+  clean_summary: data/interim/clean_summary.json
+  split_manifest: data/interim/split_manifest.json
+  processed_root: data/processed
+  fixtures_dir: data/fixtures
+  data_report: docs/data_report.md
+
+prompt:
+  system: 你是 SQLite 查询生成器。只输出一条只读 SQL，不要解释，不要使用 Markdown 代码块。
+  user_template: |-
+    数据库结构：
+    {schema}
+
+    问题：
+    {question}
+
+tokenizer:
+  model_id: Qwen/Qwen3-4B-Instruct-2507
+  revision: main
+  local_files_only: true
+  max_sequence_length: 512
+  grpo_max_new_tokens: 64
+
+execution:
+  timeout_seconds: 3.0
+  max_result_rows: 1000
+  float_tolerance: 1.0e-6
+
+split:
+  seed: 20260831
+  validation_database_count: 10
+  smoke:
+    version: cspider-smoke-v0
+    sft_train: 80
+    grpo_train: 32
+    validation: 24
+    test: 40
+  full:
+    version: cspider-v1
+    sft_train: 2000
+    grpo_train: 500
+    validation: 200
+    test: 300
