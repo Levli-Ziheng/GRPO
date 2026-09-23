@@ -1,24 +1,42 @@
-.pytest_cache/
+# Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
+# Environments and local tooling
+.venv/
+venv/
+.env
+.env.*
+.idea/
+.vscode/
 .cache/
-data/raw/
-data/train.json
-data/dev.json
-data/tables.json
-data/database/
-data/manifests/
-data/interim/
-data/processed/
-data/databases/
-data/fixtures/
 
+# Datasets, models, checkpoints, and generated artifacts
+data/
+models/
 outputs/
-!outputs/.gitkeep
-
 *.safetensors
 *.bin
 *.pt
 *.pth
 *.ckpt
+
+# Local reports, notes, agent files, and transfer scratch space
+docs/
+Note/
+tmp/
+.stage7-transfer/
+.agents/
+.codex/
+AGENTS.md
+*.md
+!README.md
+
+# OS files
+.DS_Store
+Thumbs.db

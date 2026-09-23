@@ -1,0 +1,55 @@
+model_config: configs/model.yaml
+data_config: configs/data.yaml
+dataset_root: data/processed/cspider-v1
+train_file: sft_train.jsonl
+validation_file: sft_validation.jsonl
+manifest_file: dataset_manifest.json
+seed: 20260831
+max_sequence_length: 512
+lora:
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+  bias: none
+training:
+  max_steps: 500
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0001
+  warmup_steps: 25
+  weight_decay: 0.0
+  max_grad_norm: 1.0
+  lr_scheduler_type: linear
+  optim: adamw_torch
+  bf16: true
+  gradient_checkpointing: true
+  gradient_checkpointing_kwargs:
+    use_reentrant: false
+verification:
+  mask_sample_count: 5
+  reload_atol: 1.0e-05
+  max_new_tokens: 64
+budget:
+  mode: full
+  max_steps: 500
+  max_train_samples: 2000
+  max_validation_samples: 200
+  max_seconds: 7200
+  min_free_gpu_gib: 12
+  gpu_safety_margin_gib: 2
+  min_free_disk_gib: 5
+  external_downloads: false
+evaluation_steps: 125
+logging_steps: 10
+evaluation_budget_seconds: 3600
+baseline_config: configs/baseline.yaml
+output_dir: outputs/sft/stage5-20260913-r1

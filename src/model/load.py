@@ -8,6 +8,17 @@ from typing import Any
 from src.utils.config import load_yaml, write_json
 
 
+def resolve_model_source(model_config: dict[str, Any]) -> tuple[str, bool]:
+    local_path = model_config.get("local_path")
+    if local_path:
+        path = Path(local_path)
+        if path.is_dir():
+            return str(path), True
+        if model_config.get("local_files_only"):
+            raise FileNotFoundError(f"Configured local model path does not exist: {path}")
+    return str(model_config["id"]), False
+
+
 def _torch_dtype(torch_module: Any, name: str) -> Any:
     mapping = {
         "float16": torch_module.float16,
@@ -33,6 +44,7 @@ def run_smoke_test(config: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError("CUDA-enabled PyTorch is required for the stage-0 model smoke test.")
 
     model_id = model_config["id"]
+    model_source, source_is_local = resolve_model_source(model_config)
     dtype = _torch_dtype(torch, runtime["dtype"])
     quantization_mode = runtime["quantization"]
     cuda_device = torch.device(runtime["device"])
@@ -40,12 +52,13 @@ def run_smoke_test(config: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"Stage-0 smoke test requires a CUDA device, got: {cuda_device}")
     cuda_index = cuda_device.index if cuda_device.index is not None else 0
     load_kwargs: dict[str, Any] = {
-        "revision": model_config["revision"],
         "trust_remote_code": bool(model_config["trust_remote_code"]),
         "local_files_only": bool(model_config["local_files_only"]),
-        "torch_dtype": dtype,
+        "dtype": dtype,
         "device_map": {"": cuda_index},
     }
+    if not source_is_local:
+        load_kwargs["revision"] = model_config["revision"]
     if quantization_mode == "4bit":
         load_kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
@@ -64,12 +77,12 @@ def run_smoke_test(config: dict[str, Any]) -> dict[str, Any]:
     torch.cuda.reset_peak_memory_stats(cuda_device)
     started = time.perf_counter()
     tokenizer = AutoTokenizer.from_pretrained(
-        model_id,
-        revision=model_config["revision"],
+        model_source,
         trust_remote_code=bool(model_config["trust_remote_code"]),
         local_files_only=bool(model_config["local_files_only"]),
+        **({} if source_is_local else {"revision": model_config["revision"]}),
     )
-    model = AutoModelForCausalLM.from_pretrained(model_id, **load_kwargs)
+    model = AutoModelForCausalLM.from_pretrained(model_source, **load_kwargs)
     load_seconds = time.perf_counter() - started
 
     messages = [
@@ -99,8 +112,10 @@ def run_smoke_test(config: dict[str, Any]) -> dict[str, Any]:
 
     report = {
         "model_id": model_id,
+        "model_source": model_source,
         "requested_revision": model_config["revision"],
-        "resolved_commit": getattr(model.config, "_commit_hash", None),
+        "resolved_commit": getattr(model.config, "_commit_hash", None)
+        or (model_config["revision"] if source_is_local else None),
         "dtype": runtime["dtype"],
         "quantization": quantization_mode,
         "device": str(model.device),

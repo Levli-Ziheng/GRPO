@@ -6,10 +6,14 @@ build-backend = "setuptools.build_meta"
 name = "text2sql-posttraining"
 version = "0.1.0"
 description = "A reproducible Text-to-SQL SFT and GRPO learning project"
+readme = "README.md"
 requires-python = ">=3.10"
+
+[project.urls]
+Repository = "https://github.com/Levli-Ziheng/GRPO"
+Issues = "https://github.com/Levli-Ziheng/GRPO/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q"
-

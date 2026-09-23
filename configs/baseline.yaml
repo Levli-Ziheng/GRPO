@@ -1,0 +1,23 @@
+model_config: configs/model.yaml
+data_config: configs/data.yaml
+dataset: data/processed/cspider-smoke-v0/canonical_test.jsonl
+dataset_manifest: data/processed/cspider-smoke-v0/dataset_manifest.json
+expected_samples: 40
+seed: 20260831
+generation:
+  do_sample: false
+  num_beams: 1
+  max_new_tokens: 128
+  max_sequence_length: 512
+budget:
+  gpu_count: 1
+  batch_size: 1
+  max_samples: 40
+  max_seconds: 1800
+  min_free_gpu_gib: 6
+  min_free_disk_gib: 2
+  external_downloads: false
+evaluation:
+  float_tolerance: 1.0e-6
+  timeout_seconds: 3.0
+  max_result_rows: 1000

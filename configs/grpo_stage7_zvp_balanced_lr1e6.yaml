@@ -1,0 +1,51 @@
+model_config: configs/model.yaml
+data_config: configs/data.yaml
+reward_config: configs/grpo.yaml
+adapter_path: outputs/sft/stage5-20260913-r1/best_adapter
+seed: 20260831
+max_sequence_length: 544
+smoke_dataset_root: data/processed/cspider-smoke-v0
+full_dataset_root: data/processed/cspider-v1
+sampling_strategy: proportional_interleave
+checkpoint_interval: 10
+training:
+  max_steps: 5
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  num_generations: 8
+  max_completion_length: 96
+  learning_rate: 1.0e-6
+  beta: 0.10
+  loss_type: grpo
+  scale_rewards: group
+  num_iterations: 1
+  temperature: 0.8
+  top_p: 0.95
+  top_k: 0
+  shuffle_dataset: false
+  use_vllm: false
+  bf16: true
+  gradient_checkpointing: true
+  gradient_checkpointing_kwargs:
+    use_reentrant: false
+  remove_unused_columns: false
+  report_to: none
+  save_strategy: "no"
+  lr_scheduler_type: constant_with_warmup
+  warmup_steps: 5
+rl_zvp:
+  enabled: true
+  alpha: 0.05
+  direction_signal: execution_correctness
+difficulty_priority: [medium, hard, easy, extra]
+budget:
+  gpu_count: 1
+  gpu_safety_margin_gib: 2
+  min_free_gpu_gib: 12
+  min_free_disk_gib: 5
+  smoke_max_steps: 5
+  smoke_max_seconds: 600
+  formal_max_steps: 50
+  formal_max_seconds: 3600
+  evaluation_max_seconds: 3600
+  external_downloads: false

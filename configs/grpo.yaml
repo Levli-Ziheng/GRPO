@@ -1,0 +1,34 @@
+model_config: configs/model.yaml
+dataset: data/processed/cspider-smoke-v0/grpo_train.jsonl
+dataset_manifest: data/processed/cspider-smoke-v0/dataset_manifest.json
+adapter_path: outputs/sft/stage5-20260913-r1/best_adapter
+seed: 20260831
+
+generation:
+  do_sample: false
+  num_beams: 1
+  max_new_tokens: 64
+  max_sequence_length: 512
+
+reward:
+  weights:
+    execution_correctness: 1.0
+    partial_result: 0.6
+    format_valid: 0.1
+    execution_success: 0.1
+    unsafe_sql: -1.0
+    empty_output: -0.5
+  group_advantage_epsilon: 1.0e-8
+
+self_test:
+  cases: data/fixtures/reward_cases.jsonl
+  expected_cases: 13
+
+budget:
+  gpu_count: 1
+  max_samples: 1
+  max_seconds: 300
+  min_free_gpu_gib: 6
+  gpu_safety_margin_gib: 2
+  min_free_disk_gib: 2
+  external_downloads: false

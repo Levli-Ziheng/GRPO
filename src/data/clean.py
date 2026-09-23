@@ -13,11 +13,15 @@ def load_tokenizer(config: dict[str, Any]) -> Any:
     from transformers import AutoTokenizer
 
     tokenizer_config = config["tokenizer"]
+    local_path = tokenizer_config.get("local_path")
+    source = Path(local_path) if local_path else tokenizer_config["model_id"]
+    if local_path and not source.is_dir():
+        raise FileNotFoundError(f"Configured local tokenizer path does not exist: {source}")
     return AutoTokenizer.from_pretrained(
-        tokenizer_config["model_id"],
-        revision=tokenizer_config["revision"],
+        source,
         local_files_only=bool(tokenizer_config["local_files_only"]),
         trust_remote_code=False,
+        **({} if local_path else {"revision": tokenizer_config["revision"]}),
     )
 
 
